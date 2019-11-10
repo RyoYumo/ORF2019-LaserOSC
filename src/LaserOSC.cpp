@@ -30,7 +30,7 @@ void LaserOSC::setup(const std::string& host, int port){
 void LaserOSC::drawPoint(float x, float y){
     // normalize
     float norm_x = ofMap(x, 0.f, ofGetWidth(), 0.f, 1.f);
-    float norm_y = ofMap(x, 0.f, ofGetHeight(), 0.f, 1.f);
+    float norm_y = ofMap(y, 0.f, ofGetHeight(), 0.f, 1.f);
     ofxOscMessage m;
     m.setAddress("/point");
     m.addFloatArg(norm_x);

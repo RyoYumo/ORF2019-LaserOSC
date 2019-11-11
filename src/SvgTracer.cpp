@@ -10,7 +10,7 @@
 
 namespace orf2019 {
 
-SvgTracer::SvgTracer():svg_{nullptr},trace_percentage_(0.f), is_trace(false), speed_(0.01){
+SvgTracer::SvgTracer():svg_{nullptr},trace_percentage_(0.f), is_trace_(false), speed_(0.01), type_(InternalPathTraceType::kForward){
     ofAddListener(ofEvents().update, this, &SvgTracer::update);
 }
     
@@ -25,14 +25,14 @@ void SvgTracer::setup(std::shared_ptr<ofxSVG> svg){
 //
 // Start tracing.
 void SvgTracer::start(){
-    is_trace = true;
+    is_trace_ = true;
 }
    
 // stop()
 //
 // Stop tracing.
 void SvgTracer::stop(){
-    is_trace = false;
+    is_trace_ = false;
 }
 
 // reset()
@@ -40,8 +40,9 @@ void SvgTracer::stop(){
 // From the beginning
 void SvgTracer::reset(){
     trace_percentage_ = 0.f;
-    current_path_index = 0;
+    current_path_index_ = 0;
 }
+
     
     
 // setSpeed()
@@ -50,19 +51,25 @@ void SvgTracer::reset(){
 void SvgTracer::setSpeed(float speed){
     speed_ = speed;
 }
-    
+   
+// setInternalPathTraceType()
+//
+//
+void SvgTracer::setInternalPathTraceType(SvgTracer::InternalPathTraceType type){
+    type_ = type;
+}
     
 // update()
 //
 // This function is private member.
 // Update trace progress and
 void SvgTracer::update(ofEventArgs&){
-    if(is_trace) trace_percentage_ += speed_;
+    if(is_trace_) trace_percentage_ += speed_;
     
     // go to next path.
-    if (trace_percentage_ > 1.0 && current_path_index != svg_->getNumPath()-1){
+    if (trace_percentage_ > 1.0 && current_path_index_ != svg_->getNumPath()-1){
         trace_percentage_ = 0.0f;
-        ++current_path_index;
+        ++current_path_index_;
     }
 }
  
@@ -70,7 +77,7 @@ void SvgTracer::update(ofEventArgs&){
 // getCurrentPoint()
 //
 glm::vec2  SvgTracer::getCurrentPoint() const {
-    auto current_path = svg_->getPathAt(current_path_index);
+    auto current_path = svg_->getPathAt(current_path_index_);
     current_path.setPolyWindingMode(OF_POLY_WINDING_ODD); // Without this line, the number of outlines will be 0 ...
     
     std::vector<ofPolyline> outlines;
@@ -79,9 +86,11 @@ glm::vec2  SvgTracer::getCurrentPoint() const {
     for(const auto& outline : outlines){
         for(const auto& v : outline.getVertices()) all_vertices.addVertex(v);
     }
-    return all_vertices.getPointAtPercent(trace_percentage_);
+    
+    auto pct = type_ == InternalPathTraceType::kForward ? trace_percentage_ : 1.0 - trace_percentage_;
+    return all_vertices.getPointAtPercent(pct);
 }
-
+    
     
     
 }

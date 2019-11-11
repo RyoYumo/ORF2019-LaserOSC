@@ -11,6 +11,9 @@ void ofApp::setup(){
     reverse_tracer.setup(svg);
     reverse_tracer.setInternalPathTraceType(SvgTracer::InternalPathTraceType::kReverse);
     
+    tracer.setSpeed(0.05);
+    reverse_tracer.setSpeed(0.05);
+    
 }
 
 //--------------------------------------------------------------
@@ -38,7 +41,8 @@ void ofApp::draw(){
     
     ofPushMatrix();
     ofTranslate(20, ofGetHeight()/2.);
-    tracer.getSvg()->draw();
+    //tracer.getSvg()->draw();
+    tracer.drawSvg();
     ofPopMatrix();
     
     auto tracer_point = tracer.getCurrentPoint();
@@ -48,10 +52,9 @@ void ofApp::draw(){
     auto reverse_tracer_point = reverse_tracer.getCurrentPoint();
     reverse_tracer_point += glm::vec2(20, ofGetHeight()/2.);
     laser.drawPoint(reverse_tracer_point.x, reverse_tracer_point.y);
-
     
 
-
+    
 }
 
 //--------------------------------------------------------------

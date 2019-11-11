@@ -14,7 +14,7 @@
 namespace orf2019 {
 class SvgTracer {
 public:
-    enum class InternalPathTraceType {kForward, kReverse};
+    enum class InternalPathTraceType {kForward, kReverse };
     SvgTracer();
     void       setup(std::shared_ptr<ofxSVG> svg);
     void       start();
@@ -24,6 +24,7 @@ public:
     void       setInternalPathTraceType(InternalPathTraceType type);
     glm::vec2  getCurrentPoint() const;
     std::shared_ptr<ofxSVG> getSvg() { return svg_;}
+    void       drawSvg() const ;
     
 private:
     void update(ofEventArgs&);

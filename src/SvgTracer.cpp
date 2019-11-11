@@ -88,9 +88,16 @@ glm::vec2  SvgTracer::getCurrentPoint() const {
     }
     
     auto pct = type_ == InternalPathTraceType::kForward ? trace_percentage_ : 1.0 - trace_percentage_;
+    
     return all_vertices.getPointAtPercent(pct);
 }
     
     
+void SvgTracer::drawSvg() const {
+    for(auto i = 0; i < current_path_index_+1; ++i){
+        const auto& path = svg_->getPathAt(i);
+        path.draw();
+    }
+}
     
 }

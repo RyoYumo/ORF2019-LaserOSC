@@ -14,4 +14,6 @@ public:
 private:
     orf2019::LaserOSC  laser;
     orf2019::SvgTracer tracer;
+    orf2019::SvgTracer reverse_tracer;
+
 };

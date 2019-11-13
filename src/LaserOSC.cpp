@@ -22,7 +22,6 @@ void LaserOSC::setup() {
 void LaserOSC::setup(const std::string& host, int port){
     sender_.setup(host, port);
 }
-   
     
 // setup()
 //
@@ -30,7 +29,7 @@ void LaserOSC::setup(const std::string& host, int port){
 void LaserOSC::drawPoint(float x, float y){
     // normalize
     float norm_x = ofMap(x, 0.f, ofGetWidth(), 0.f, 1.f);
-    float norm_y = ofMap(y, 0.f, ofGetHeight(), 0.f, 1.f);
+    float norm_y = 1.0 - ofMap(y, 0.f, ofGetHeight(), 0.f, 1.f);
     ofxOscMessage m;
     m.setAddress("/point");
     m.addFloatArg(norm_x);
@@ -45,10 +44,15 @@ void LaserOSC::drawPoint(float x, float y){
     
 void LaserOSC::drawLine(float x1, float y1, float x2, float y2){
     // normalize
+    // OpenGL coordinate
+    // (0.0, 1.0) ----------------------- (1.0, 1.0)
+    //            -------[window]--------
+    //            -----------------------
+    // (0.0, 0.0) ----------------------- (1.0, 0.0)
     float norm_x1 = ofMap(x1, 0.f, ofGetWidth(), 0.f, 1.f);
-    float norm_y1 = ofMap(y1, 0.f, ofGetWidth(), 0.f, 1.f);
+    float norm_y1 = 1.0 - ofMap(y1, 0.f, ofGetWidth(), 0.f, 1.f);
     float norm_x2 = ofMap(x2, 0.f, ofGetHeight(), 0.f, 1.f);
-    float norm_y2 = ofMap(y2, 0.f, ofGetHeight(), 0.f, 1.f);
+    float norm_y2 = 1.0 - ofMap(y2, 0.f, ofGetHeight(), 0.f, 1.f);
     ofxOscMessage m;
     m.setAddress("/line");
     m.addFloatArg(norm_x1);
@@ -66,7 +70,7 @@ void LaserOSC::drawLine(float x1, float y1, float x2, float y2){
 void LaserOSC::drawEllipse(float x, float y, float w, float h){
     // normalize
     float norm_x = ofMap(x, 0.f, ofGetWidth(), 0.f, 1.f);
-    float norm_y = ofMap(y, 0.f, ofGetWidth(), 0.f, 1.f);
+    float norm_y = 1.0 - ofMap(y, 0.f, ofGetWidth(), 0.f, 1.f);
     float norm_w = ofMap(w, 0.f, ofGetHeight(), 0.f, 1.f);
     float norm_h = ofMap(h, 0.f, ofGetHeight(), 0.f, 1.f);
     ofxOscMessage m;
@@ -86,7 +90,7 @@ void LaserOSC::drawEllipse(float x, float y, float w, float h){
 void LaserOSC::drawRect(float x, float y, float w, float h){
     // normalize
     float norm_x = ofMap(x, 0.f, ofGetWidth(), 0.f, 1.f);
-    float norm_y = ofMap(y, 0.f, ofGetWidth(), 0.f, 1.f);
+    float norm_y = 1.0 - ofMap(y, 0.f, ofGetWidth(), 0.f, 1.f);
     float norm_w = ofMap(w, 0.f, ofGetHeight(), 0.f, 1.f);
     float norm_h = ofMap(h, 0.f, ofGetHeight(), 0.f, 1.f);
     ofxOscMessage m;

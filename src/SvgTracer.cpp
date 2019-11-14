@@ -7,19 +7,33 @@
 
 #include "SvgTracer.hpp"
 #include "ofMain.h"
+#include "ofxSvg.h"
 
 namespace orf2019 {
 
-SvgTracer::SvgTracer():svg_{nullptr},trace_percentage_(0.f), is_trace_(false), speed_(0.01), type_(InternalPathTraceType::kForward){
+SvgTracer::SvgTracer():output_{nullptr}, progress_(0.f), is_trace_(false), speed_(0.01), current_path_index_{0}{
     ofAddListener(ofEvents().update, this, &SvgTracer::update);
 }
     
-// setup()
-//
-// Set the target SVG.
-void SvgTracer::setup(std::shared_ptr<ofxSVG> svg){
-    svg_  = svg;
+
+    
+void SvgTracer::load(const std::string& path){
+    ofxSVG svg;
+    svg.load(path);
+    
+    std::transform(svg.getPaths().begin(), svg.getPaths().end(), std::back_inserter(paths_), [](ofPath path){
+        path.setPolyWindingMode(OF_POLY_WINDING_ODD);
+        path.setColor(ofColor(255,255,255));
+        return path;
+    });
 }
+    
+    
+void SvgTracer::setLaserOutput(LaserOSC* output){
+    output_ = output;
+}
+
+    
 
 // start()
 //
@@ -38,11 +52,16 @@ void SvgTracer::stop(){
 // reset()
 //
 // From the beginning
-void SvgTracer::reset(){
-    trace_percentage_ = 0.f;
+void SvgTracer::restart(){
+    progress_ = 0.f;
     current_path_index_ = 0;
+    if(!is_trace_) start();
 }
+    
 
+void SvgTracer::reverse(){
+    std::reverse(paths_.begin(), paths_.end());
+}
     
     
 // setSpeed()
@@ -51,35 +70,62 @@ void SvgTracer::reset(){
 void SvgTracer::setSpeed(float speed){
     speed_ = speed;
 }
-   
-// setInternalPathTraceType()
-//
-//
-void SvgTracer::setInternalPathTraceType(SvgTracer::InternalPathTraceType type){
-    type_ = type;
-}
     
+void SvgTracer::translate(const glm::vec2& translation){
+    translation_ = translation;
+}
+   
 // update()
 //
 // This function is private member.
 // Update trace progress and
 void SvgTracer::update(ofEventArgs&){
-    if(is_trace_) trace_percentage_ += speed_;
+    if(is_trace_) progress_ += speed_;
     
     // go to next path.
-    if (trace_percentage_ > 1.0 && current_path_index_ != svg_->getNumPath()-1){
-        trace_percentage_ = 0.0f;
+    if (progress_ > 1.0 && current_path_index_ != paths_.size()-1){
+        progress_ = 0.0f;
         ++current_path_index_;
+    }else if ( is_trace_ && current_path_index_ == paths_.size()-1){
+        stop();
+        static int n = 0;
+        ++n;
+        ofNotifyEvent(finish_event_, n);
     }
 }
- 
     
-// getCurrentPoint()
-//
-glm::vec2  SvgTracer::getCurrentPoint() const {
-    auto current_path = svg_->getPathAt(current_path_index_);
-    current_path.setPolyWindingMode(OF_POLY_WINDING_ODD); // Without this line, the number of outlines will be 0 ...
+void SvgTracer::drawSvg() const {
+    ofPushMatrix();
+    ofTranslate(translation_);
+    for(auto i = 0; i < current_path_index_+1; ++i){
+        auto& path = paths_.at(i);
+        path.draw();
+    }
+    ofPopMatrix();
+}
     
+void SvgTracer::drawPointOnTracing() const{
+    if(output_){ // nullptr check
+        auto current_path = paths_.at(current_path_index_);
+        std::vector<ofPolyline> outlines;
+        std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));
+        ofPolyline all_vertices;
+        for(const auto& outline : outlines){
+            for(const auto& v : outline.getVertices()) all_vertices.addVertex(v);
+        }
+        
+        auto pct = progress_;
+        auto point = all_vertices.getPointAtPercent(pct) + translation_;
+        output_-> drawPoint(point.x, point.y);
+        
+    }else{
+        ofLogError() << "Not found laser output. Please call setLayserOutput()...";
+    }
+}
+    
+    
+glm::vec2  SvgTracer::getPointOnTracing() const{
+    auto current_path = paths_.at(current_path_index_);
     std::vector<ofPolyline> outlines;
     std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));
     ofPolyline all_vertices;
@@ -87,17 +133,10 @@ glm::vec2  SvgTracer::getCurrentPoint() const {
         for(const auto& v : outline.getVertices()) all_vertices.addVertex(v);
     }
     
-    auto pct = type_ == InternalPathTraceType::kForward ? trace_percentage_ : 1.0 - trace_percentage_;
-    
-    return all_vertices.getPointAtPercent(pct);
+    auto pct = progress_;
+    auto point = all_vertices.getPointAtPercent(pct) + translation_;
+    return point;
 }
-    
-    
-void SvgTracer::drawSvg() const {
-    for(auto i = 0; i < current_path_index_+1; ++i){
-        const auto& path = svg_->getPathAt(i);
-        path.draw();
-    }
-}
+
     
 }

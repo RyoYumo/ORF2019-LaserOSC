@@ -18,7 +18,6 @@ class SvgTracer {
 public:
     SvgTracer();
     void          load(const std::string& path);
-    void          setLaserOutput(LaserOSC* output);
     void          start();
     void          stop();
     void          restart();
@@ -26,12 +25,10 @@ public:
     void          setSpeed(float speed);
     void          translate(const glm::vec2& translation);
     void          drawSvg() const ;
-    void          drawPointOnTracing() const;
-    glm::vec2     getPointOnTracing() const;
+    glm::vec2     getTracingPoint() const;
     ofEvent<int>& getFinishEvent() { return finish_event_;}
     
 private:
-    LaserOSC*           output_;
     std::vector<ofPath> paths_;
     float               progress_;
     float               speed_;

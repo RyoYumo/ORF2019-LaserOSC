@@ -11,7 +11,7 @@
 
 namespace orf2019 {
 
-SvgTracer::SvgTracer():output_{nullptr}, progress_(0.f), is_trace_(false), speed_(0.01), current_path_index_{0}{
+SvgTracer::SvgTracer():progress_(0.f), is_trace_(false), speed_(0.01), current_path_index_{0}{
     ofAddListener(ofEvents().update, this, &SvgTracer::update);
 }
     
@@ -27,12 +27,6 @@ void SvgTracer::load(const std::string& path){
         return path;
     });
 }
-    
-    
-void SvgTracer::setLaserOutput(LaserOSC* output){
-    output_ = output;
-}
-
     
 
 // start()
@@ -104,27 +98,7 @@ void SvgTracer::drawSvg() const {
     ofPopMatrix();
 }
     
-void SvgTracer::drawPointOnTracing() const{
-    if(output_){ // nullptr check
-        auto current_path = paths_.at(current_path_index_);
-        std::vector<ofPolyline> outlines;
-        std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));
-        ofPolyline all_vertices;
-        for(const auto& outline : outlines){
-            for(const auto& v : outline.getVertices()) all_vertices.addVertex(v);
-        }
-        
-        auto pct = progress_;
-        auto point = all_vertices.getPointAtPercent(pct) + translation_;
-        output_-> drawPoint(point.x, point.y);
-        
-    }else{
-        ofLogError() << "Not found laser output. Please call setLayserOutput()...";
-    }
-}
-    
-    
-glm::vec2  SvgTracer::getPointOnTracing() const{
+glm::vec2  SvgTracer::getTracingPoint() const{
     auto current_path = paths_.at(current_path_index_);
     std::vector<ofPolyline> outlines;
     std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));

@@ -2,58 +2,80 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    laser.setup("127.0.0.1", 8888);
-    auto svg = std::make_shared<ofxSVG>();
-    svg -> load("equation.svg");
+    ofBackground(0, 0, 0);
     
-    using namespace orf2019;
-    tracer.setup(svg);
-    reverse_tracer.setup(svg);
-    reverse_tracer.setInternalPathTraceType(SvgTracer::InternalPathTraceType::kReverse);
+    /* setup laser OSC output
+     laser.setup(); -> connect HOST "192.168.0.1" PORT 10000 */
+    laser.setup("127.0.0.1", 8989);
     
-    tracer.setSpeed(0.05);
-    reverse_tracer.setSpeed(0.05);
+    // load svg
+    tracer.load("original/equation_2.svg");
+    
+    // set trace speed
+    tracer.setSpeed(0.09);
+    
+    // svg translation pos
+    tracer.translate(glm::vec2(100, ofGetHeight()/2.));
+    
+    
+    for(auto i = 0; i < 100; ++i){
+        poly.addVertex(glm::vec3(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()), 0));
+    }
+    
+    // add trace finish callback
+    ofAddListener(tracer.getFinishEvent(), this, &ofApp::finishCallback);
+    
+    radical_mask.setOpacity(0.5);
+    radical_mask.setRadius(200.0f);
     
 }
 
+
 //--------------------------------------------------------------
 void ofApp::update(){
+    radical_mask.setCenter(tracer.getTracingPoint());
+}
 
 
+// laser calibration test pattern
+void ofApp::drawTestPattern(){
+    // laser coord
+    laser.drawPoint(ofGetWidth()/2, ofGetHeight()/2.);
+    laser.drawPoint(0, ofGetHeight()/2.);
+    laser.drawPoint(ofGetWidth(), ofGetHeight()/2.);
+    laser.drawPoint(ofGetWidth()/2., 0);
+    laser.drawPoint(ofGetWidth()/2., ofGetHeight());
+    
+    
+    
+    // pixel coord
+    ofPushStyle();
+    ofSetColor(255,255,255);
+    ofDrawCircle(ofGetWidth()/2., ofGetHeight()/2., 20);
+    ofDrawCircle(0., ofGetHeight()/2., 20);
+    ofDrawCircle(ofGetWidth(), ofGetHeight()/2., 20);
+    ofDrawCircle(ofGetWidth()/2., 0, 20);
+    ofDrawCircle(ofGetWidth()/2., ofGetHeight(), 20);
+    ofPopStyle();
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    if (is_test) drawTestPattern();
+    
+    if (is_draw){
+        ofPushMatrix();
+        ofSetColor(255, 255, 255);
+        tracer.drawSvg();
+        ofPopMatrix();
+        laser.drawPoint(tracer.getTracingPoint().x, tracer.getTracingPoint().y);
 
-    std::stringstream ss;
-    ss << "-----key------\n"
-    << "Press [SPACE] : Start SVG tracing.\n"
-    << "Press [RETURN] :  Stop SVG tracing. \n"
-    << "Press [LEFT] : Reset SVG tracing. \n";
-    ofPushStyle();
-    ofSetColor(0, 0, 0);
-    ofDrawBitmapString(ss.str(), 20, 20);
-    ofPopStyle();
-    
-    
-    laser.drawPoint(ofGetWidth()/2, ofGetHeight()/2.);
-    laser.drawLine(0, 0,ofGetWidth(), ofGetHeight());
-    
-    ofPushMatrix();
-    ofTranslate(20, ofGetHeight()/2.);
-    //tracer.getSvg()->draw();
-    tracer.drawSvg();
-    ofPopMatrix();
-    
-    auto tracer_point = tracer.getCurrentPoint();
-    tracer_point += glm::vec2(20, ofGetHeight()/2.);
-    laser.drawPoint(tracer_point.x, tracer_point.y);
-
-    auto reverse_tracer_point = reverse_tracer.getCurrentPoint();
-    reverse_tracer_point += glm::vec2(20, ofGetHeight()/2.);
-    laser.drawPoint(reverse_tracer_point.x, reverse_tracer_point.y);
-    
-
+        // mask effect
+        radical_mask.begin();
+        poly.draw();
+        radical_mask.end();
+    }
     
 }
 
@@ -61,16 +83,20 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
     if(key == ' '){
         tracer.start();
-        reverse_tracer.start();
+        is_draw = true;
     }
+    
     if (key == OF_KEY_RETURN){
         tracer.stop();
-        reverse_tracer.stop();
+        is_draw = false;
     }
     
     if (key == OF_KEY_LEFT){
-        tracer.reset();
-        reverse_tracer.reset();
+        tracer.restart();
+    }
+    
+    if (key == 'd'){
+        is_test = !is_test;
     }
 }
 

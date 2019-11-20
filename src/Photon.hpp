@@ -22,7 +22,6 @@ public:
     void setup() override;
     void drawLaser() override;
     void drawVisual() override;
-    void reset() override {}
     void drawTracingPoint();
     void drawOutlineCircle();
     

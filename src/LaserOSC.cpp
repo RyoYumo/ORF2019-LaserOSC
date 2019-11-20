@@ -93,14 +93,14 @@ void LaserOSC::drawPointOnOFWindow(float x, float y){
     
 void LaserOSC::drawLineOnOFWindow(float x1, float y1, float x2, float y2 ){
     ofPushStyle();
-    ofFill();
     ofDrawLine(x1, y1, x2, y2);
     ofPopStyle();
 }
     
 void LaserOSC::drawEllipseOnOFWindow(float x, float y, float w, float h){
     ofPushStyle();
-    ofFill();
+    ofSetCircleResolution(60.0);
+    ofNoFill();
     ofDrawEllipse(x, y, w, h);
     ofPopStyle();
 }
@@ -108,7 +108,7 @@ void LaserOSC::drawEllipseOnOFWindow(float x, float y, float w, float h){
     
 void LaserOSC::drawRectOnOFWindow(float x, float y, float w, float h){
     ofPushStyle();
-    ofFill();
+    ofNoFill();
     ofDrawEllipse(x, y, w, h);
     ofPopStyle();
 }

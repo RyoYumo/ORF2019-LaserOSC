@@ -58,6 +58,7 @@ void Photon::drawTracingPoint(){
         ofPushMatrix();
         ofTranslate(d.x, d.y);
         laser_->drawPoint(d.radius * cos(ofDegToRad(degree_)), d.radius * sin(ofDegToRad(degree_)));
+        laser_->drawPoint(d.radius * cos(ofDegToRad(-1 * degree_)), d.radius * sin(ofDegToRad(-1 * degree_)));
         ofPopMatrix();
     }
 }

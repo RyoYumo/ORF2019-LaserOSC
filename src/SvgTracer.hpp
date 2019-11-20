@@ -20,13 +20,15 @@ public:
     void          load(const std::string& path);
     void          start();
     void          stop();
+    void          reset();
     void          restart();
     void          reverse();
+    void          shuffle();
     void          setSpeed(float speed);
     void          translate(const glm::vec2& translation);
     void          drawSvg() const ;
     glm::vec2     getTracingPoint() const;
-    ofEvent<int>& getFinishEvent() { return finish_event_;}
+    ofEvent<void>& getFinishEvent() { return finish_event_;}
     
 private:
     std::vector<ofPath> paths_;
@@ -36,7 +38,7 @@ private:
     int                 current_path_index_;
     void                update(ofEventArgs&);
     glm::vec2           translation_;
-    ofEvent<int>        finish_event_;
+    ofEvent<void>       finish_event_;
 };
 } // namespace orf2019
 

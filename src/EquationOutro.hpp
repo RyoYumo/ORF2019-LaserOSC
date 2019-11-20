@@ -1,12 +1,12 @@
 //
-//  EquationIntro.hpp
+//  EquationOutro.hpp
 //  ORF2019-LaserOSC
 //
-//  Created by Ryo Yumoto on 2019/11/20.
+//  Created by Ryo Yumoto on 2019/11/21.
 //
 
-#ifndef EquationIntro_hpp
-#define EquationIntro_hpp
+#ifndef EquationOutro_hpp
+#define EquationOutro_hpp
 
 #include "LaserOSC.hpp"
 #include "SceneManager.hpp"
@@ -14,9 +14,9 @@
 #include "ofEvents.h"
 
 namespace orf2019 {
-class EquationIntro  : public BaseScene {
+class EquationOutro  : public BaseScene {
 public:
-    EquationIntro();
+    EquationOutro();
     void setup() override;
     void setLaser(LaserOSC* laser) override;
     void drawLaser() override;
@@ -24,11 +24,8 @@ public:
         
 private:
     LaserOSC* laser_;
-    std::vector<SvgTracer> tracers_;
-    static const int kEquationNum = 14;
-    std::size_t index_;
-    std::size_t count_;
+    SvgTracer tracer_;
 };
 }
 
-#endif /* EquationIntro_hpp */
+#endif /* EquationOutro_hpp */

@@ -8,19 +8,17 @@
 #include "SvgTracer.hpp"
 #include "ofMain.h"
 #include "ofxSvg.h"
+#include <random>
 
 namespace orf2019 {
 
-SvgTracer::SvgTracer():progress_(0.f), is_trace_(false), speed_(0.01), current_path_index_{0}{
+SvgTracer::SvgTracer():progress_(0.f), is_trace_(false), speed_(0.09), current_path_index_{0}{
     ofAddListener(ofEvents().update, this, &SvgTracer::update);
 }
-    
-
     
 void SvgTracer::load(const std::string& path){
     ofxSVG svg;
     svg.load(path);
-    
     std::transform(svg.getPaths().begin(), svg.getPaths().end(), std::back_inserter(paths_), [](ofPath path){
         path.setPolyWindingMode(OF_POLY_WINDING_ODD);
         path.setColor(ofColor(255,255,255));
@@ -28,24 +26,14 @@ void SvgTracer::load(const std::string& path){
     });
 }
     
-
-// start()
-//
-// Start tracing.
 void SvgTracer::start(){
     is_trace_ = true;
 }
    
-// stop()
-//
-// Stop tracing.
 void SvgTracer::stop(){
     is_trace_ = false;
 }
 
-// reset()
-//
-// From the beginning
 void SvgTracer::restart(){
     progress_ = 0.f;
     current_path_index_ = 0;
@@ -53,14 +41,24 @@ void SvgTracer::restart(){
 }
     
 
+void SvgTracer::reset(){
+    progress_ = 0.f;
+    current_path_index_ = 0;
+    if(is_trace_) stop();
+}
+    
+
 void SvgTracer::reverse(){
     std::reverse(paths_.begin(), paths_.end());
 }
     
-    
-// setSpeed()
-//
-// Set how much the trace percentage increases per frame.
+void SvgTracer::shuffle(){
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    std::shuffle(paths_.begin(), paths_.end(), engine);
+}
+
+
 void SvgTracer::setSpeed(float speed){
     speed_ = speed;
 }
@@ -69,10 +67,7 @@ void SvgTracer::translate(const glm::vec2& translation){
     translation_ = translation;
 }
    
-// update()
-//
-// This function is private member.
-// Update trace progress and
+
 void SvgTracer::update(ofEventArgs&){
     if(is_trace_) progress_ += speed_;
     
@@ -82,9 +77,7 @@ void SvgTracer::update(ofEventArgs&){
         ++current_path_index_;
     }else if ( is_trace_ && current_path_index_ == paths_.size()-1){
         stop();
-        static int n = 0;
-        ++n;
-        ofNotifyEvent(finish_event_, n);
+        ofNotifyEvent(finish_event_);
     }
 }
     
@@ -92,24 +85,20 @@ void SvgTracer::drawSvg() const {
     ofPushMatrix();
     ofTranslate(translation_);
     for(auto i = 0; i < current_path_index_+1; ++i){
-        auto& path = paths_.at(i);
-        path.draw();
+        paths_.at(i).draw();
     }
     ofPopMatrix();
 }
     
-glm::vec2  SvgTracer::getTracingPoint() const{
-    auto current_path = paths_.at(current_path_index_);
+glm::vec2  SvgTracer::getTracingPoint() const {
+    auto& current_path = paths_.at(current_path_index_);
     std::vector<ofPolyline> outlines;
     std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));
     ofPolyline all_vertices;
     for(const auto& outline : outlines){
-        for(const auto& v : outline.getVertices()) all_vertices.addVertex(v);
+        all_vertices.addVertices(outline.getVertices());
     }
-    
-    auto pct = progress_;
-    auto point = all_vertices.getPointAtPercent(pct) + translation_;
-    return point;
+    return all_vertices.getPointAtPercent(progress_) + translation_;
 }
 
     

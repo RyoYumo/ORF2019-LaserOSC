@@ -23,7 +23,7 @@ public:
         ofPushStyle();
         ofNoFill();
         ofSetColor(255,0,0);
-        ofSetLineWidth(3.0);
+        ofSetLineWidth(4.0);
         ofPushMatrix();
         ofTranslate(100, 100);
         ofDrawCircle(0, 0, radius);
@@ -53,6 +53,7 @@ public:
         ofPopMatrix();
         ofPopStyle();
     }
+    
     
 private:
     LaserOSC* laser_;

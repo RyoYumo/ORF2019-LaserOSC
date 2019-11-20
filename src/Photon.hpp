@@ -11,6 +11,7 @@
 #include "LaserOSC.hpp"
 #include "SceneManager.hpp"
 #include "glm/glm.hpp"
+#include "ofImage.h"
 #include <unordered_map>
 
 namespace orf2019 {
@@ -20,11 +21,19 @@ public:
     void setLaser(LaserOSC* laser) override { laser_ = laser; }
     void setup() override;
     void drawLaser() override;
-    void drawVisual() override {}
+    void drawVisual() override;
+    void reset() override {}
     
 private:
-    struct Data { float x, y, radius; };
-    std::map<int, std::vector<Data>> img_data_map_;
+    struct CircleData {
+        float x, y, radius;
+    };
+    struct Data {
+        ofImage img;
+        std::vector<CircleData> circles;
+    };
+    
+    std::vector<Data> data_;
     LaserOSC* laser_;
     std::size_t index_;
 

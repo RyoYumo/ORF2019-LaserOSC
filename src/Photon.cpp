@@ -12,28 +12,39 @@
 namespace orf2019 {
 void Photon::setup(){
     // OSC
-    ofxSubscribeOsc(54321, "/img", index_);
-    
+    ofxSubscribeOsc(8000, "/img", [&](){ index_ = ofRandom(0, 136);});
     ofJson js;
     js = ofLoadJson("photon/photon-1.json");
-    for(auto i = 0; i < js.size(); ++i){
+    const int kImageNum = 136;
+    data_.resize(kImageNum);
+    
+    for(auto i = 0; i < kImageNum; ++i){
+        data_[i].img.load("photon/images/" + ofToString(i) + ".png");
+    }
+    
+    for(auto i = 0; i < kImageNum; ++i){
         auto d = js[ofToString(i)];
         for(auto dd : d){
-            Data data;
+            CircleData data;
             data.x = dd["x"];
             data.y = dd["y"];
             data.radius = dd["radius"];
-            img_data_map_[i].push_back(data);
+            data_[i].circles.push_back(data);
         }
     }
 }
     
-void Photon::drawLaser(){
-    auto data = img_data_map_[index_];
-    for(auto d : data){
-        laser_->drawEllipse(d.x, d.y, d.radius, d.radius);
-    }
+void Photon::drawVisual(){
+    data_[index_].img.draw(1920. * 0.5 - 1080. * 0.5, 0, 1080.,1080.);
 }
     
+void Photon::drawLaser(){
+    for(auto d : data_[index_].circles){
+        ofPushMatrix();
+        ofTranslate(d.x, d.y);
+        laser_->drawEllipse(0, 0, d.radius*2.0, d.radius*2.0);
+        ofPopMatrix();
+    }
+}
     
 }

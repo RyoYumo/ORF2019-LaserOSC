@@ -12,23 +12,24 @@
 namespace orf2019 {
 void Photon::setup(){
     // OSC
-    ofxSubscribeOsc(8000, "/img", [&](){ index_ = ofRandom(0, 136);});
-    ofJson js;
-    js = ofLoadJson("photon/photon-1.json");
-    const int kImageNum = 136;
-    data_.resize(kImageNum);
+    const int kPort = 8000;
+    ofxSubscribeOsc(kPort, "/photon/next", [&](){ index_ = ofRandom(0, 136);}); // random index
+    ofxSubscribeOsc(kPort, "/photon/degree", [&](ofxOscMessage& m) { degree_ = m.getArgAsFloat(0) * 360 - 90.0;}); // for tracing
+    ofxSubscribeOsc(kPort, "/photon/outline", [&](ofxOscMessage& m){ state_ = DrawState::kOutline;}); // change draw state
+    ofxSubscribeOsc(kPort, "/photon/tracing", [&](ofxOscMessage& m){ state_ = DrawState::kTracing;}); // change draw state
     
+    // load img
     for(auto i = 0; i < kImageNum; ++i){
         data_[i].img.load("photon/images/" + ofToString(i) + ".png");
     }
     
+    // load coord info
+    ofJson js = ofLoadJson("photon/photon.json");
     for(auto i = 0; i < kImageNum; ++i){
         auto d = js[ofToString(i)];
-        for(auto dd : d){
+        for(auto&& dd : d){
             CircleData data;
-            data.x = dd["x"];
-            data.y = dd["y"];
-            data.radius = dd["radius"];
+            data.x = dd["x"]; data.y = dd["y"]; data.radius = dd["radius"];
             data_[i].circles.push_back(data);
         }
     }
@@ -39,7 +40,11 @@ void Photon::drawVisual(){
 }
     
 void Photon::drawLaser(){
-    for(auto d : data_[index_].circles){
+    if (state_ == DrawState::kOutline) drawOutlineCircle(); else drawTracingPoint();
+}
+    
+void Photon::drawOutlineCircle(){
+    for(const auto& d : data_[index_].circles){
         ofPushMatrix();
         ofTranslate(d.x, d.y);
         laser_->drawEllipse(0, 0, d.radius*2.0, d.radius*2.0);
@@ -47,4 +52,13 @@ void Photon::drawLaser(){
     }
 }
     
+    
+void Photon::drawTracingPoint(){
+    for(const auto& d : data_[index_].circles){
+        ofPushMatrix();
+        ofTranslate(d.x, d.y);
+        laser_->drawPoint(d.radius * cos(ofDegToRad(degree_)), d.radius * sin(ofDegToRad(degree_)));
+        ofPopMatrix();
+    }
+}
 }

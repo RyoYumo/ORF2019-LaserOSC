@@ -17,25 +17,28 @@
 namespace orf2019 {
 class Photon : public BaseScene{
 public:
-    Photon():index_{0}{}
+    Photon():index_{0}, data_(kImageNum), state_{DrawState::kOutline}{}
     void setLaser(LaserOSC* laser) override { laser_ = laser; }
     void setup() override;
     void drawLaser() override;
     void drawVisual() override;
     void reset() override {}
+    void drawTracingPoint();
+    void drawOutlineCircle();
     
 private:
-    struct CircleData {
-        float x, y, radius;
-    };
+    enum class DrawState { kOutline, kTracing };
+    static const int kImageNum = 136;
+    struct CircleData { float x, y, radius; };
     struct Data {
         ofImage img;
         std::vector<CircleData> circles;
     };
-    
     std::vector<Data> data_;
     LaserOSC* laser_;
     std::size_t index_;
+    float degree_;
+    DrawState state_;
 
 };
 }

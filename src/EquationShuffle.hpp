@@ -19,15 +19,18 @@ public:
     EquationShuffle():tracers_{kEquationNum}{}
     void setup() override;
     void setLaser(LaserOSC* laser) override;
+    void reset() override;
     void drawLaser() override;
     void drawVisual() override;
     
 private:
+    void update(ofEventArgs&);
     LaserOSC* laser_;
     std::vector<SvgTracer> tracers_;
     static const int kEquationNum = 6;
     std::size_t index_ {0};
-    std::size_t count_ {0};
+    float reset_timer_ {0.0f};
+    
 };
 }
 

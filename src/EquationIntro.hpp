@@ -19,15 +19,20 @@ public:
     EquationIntro();
     void setup() override;
     void setLaser(LaserOSC* laser) override;
+    void reset() override;
     void drawLaser() override;
     void drawVisual() override;
         
 private:
+    void nextEquation();
+    void update(ofEventArgs&);
     LaserOSC* laser_;
     std::vector<SvgTracer> tracers_;
     static const int kEquationNum = 14;
     std::size_t index_;
-    std::size_t count_;
+    float speed_;
+    bool is_finish_event_;
+    float delay_timer_;
 };
 }
 

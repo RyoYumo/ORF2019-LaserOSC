@@ -92,10 +92,8 @@ void SvgTracer::drawSvg() const {
     
 glm::vec2  SvgTracer::getTracingPoint() const {
     auto& current_path = paths_.at(current_path_index_);
-    std::vector<ofPolyline> outlines;
-    std::copy(current_path.getOutline().begin(), current_path.getOutline().end(), std::back_inserter(outlines));
     ofPolyline all_vertices;
-    for(const auto& outline : outlines){
+    for(auto&& outline : current_path.getOutline()){
         all_vertices.addVertices(outline.getVertices());
     }
     return all_vertices.getPointAtPercent(progress_) + translation_;

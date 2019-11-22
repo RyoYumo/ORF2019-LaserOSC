@@ -9,7 +9,7 @@
 #define SceneManager_hpp
 
 #include "LaserOSC.hpp"
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 
@@ -19,6 +19,7 @@ public:
     virtual ~BaseScene() = default;
     virtual void setup() = 0;
     virtual void setLaser(LaserOSC* laser) = 0;
+    virtual void reset() = 0;
     virtual void drawLaser() = 0;
     virtual void drawVisual() = 0;
 };
@@ -27,15 +28,14 @@ public:
 class SceneManager {
 public:
     SceneManager();
-    void addScene(const std::string& scene_name, std::shared_ptr<BaseScene> scene);
+    void addScene(const std::string& scene_name, std::unique_ptr<BaseScene> scene);
     void setup();
     void setLaser(LaserOSC* laser);
     void drawLaser();
     void drawVisual();
-    std::shared_ptr<BaseScene> getScene(const std::string& name);
     void changeScene(const std::string& name);
 private:
-    std::map<std::string, std::shared_ptr<BaseScene>> scenes_;
+    std::unordered_map<std::string, std::unique_ptr<BaseScene>> scenes_;
     std::string current_scene_name_;
         
 };

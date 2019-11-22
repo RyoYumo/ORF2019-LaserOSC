@@ -10,13 +10,6 @@
 
 namespace orf2019 {
 void EquationShuffle::setup(){
-    ofxSubscribeOsc(8000, "/shuffle/restart", [&](ofxOscMessage& m){
-        for(auto& tracer : tracers_) {
-            tracer.restart();
-            tracer.shuffle();
-        }
-    });
-    
     for(auto i = 0; i < kEquationNum; ++i){
         tracers_[i].load("equation/equation_12.svg");
     }
@@ -25,12 +18,25 @@ void EquationShuffle::setup(){
         tracers_[i].shuffle();
         tracers_[i].translate(glm::vec2(14.738, i * 200));
     }
+    ofAddListener(ofEvents().update, this, &EquationShuffle::update);
 }
     
 void EquationShuffle::setLaser(LaserOSC* laser){
     laser_ = laser;
 }
 
+void EquationShuffle::update(ofEventArgs&){
+    reset_timer_ += 0.005;
+    if(reset_timer_ > 1.0) {
+        for(auto& t : tracers_) t.restart();
+        reset_timer_ = 0.0;
+    }
+}
+    
+void EquationShuffle::reset(){
+    reset_timer_ = 0.0;
+    for(auto& t : tracers_) t.restart();
+}
     
 void EquationShuffle::drawLaser(){
     for(auto i = 0; i < tracers_.size(); ++i){

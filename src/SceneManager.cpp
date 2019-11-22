@@ -24,7 +24,6 @@ void SceneManager::setup(){
 void SceneManager::setLaser(LaserOSC* laser){
     for(auto& scene : scenes_) scene.second->setLaser(laser);
 }
-
     
 void SceneManager::drawLaser(){
     scenes_[current_scene_name_]->drawLaser();
@@ -38,6 +37,7 @@ void SceneManager::changeScene(const std::string& name){
     decltype(scenes_)::iterator itr = scenes_.find(name);
     if(itr!=scenes_.end()){
         current_scene_name_ = name;
+        scenes_[current_scene_name_]->reset();
     }
 }
 

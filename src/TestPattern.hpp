@@ -17,7 +17,10 @@ class TestPattern : public BaseScene {
 public:
     void setup() override {}
     void setLaser(LaserOSC* laser) override { laser_ = laser; }
-    void drawLaser() override {}
+    void reset() override {}
+    void drawLaser() override {
+        
+    }
     void drawVisual() override {
         float radius = 30.0f;
         ofPushStyle();

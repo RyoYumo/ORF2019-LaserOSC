@@ -11,50 +11,57 @@
 
 namespace orf2019 {
     
-EquationIntro::EquationIntro(): index_{0}, count_{0}{
-    
-}
+EquationIntro::EquationIntro(): index_{0}, speed_(0.09),is_finish_event_{false}, delay_timer_{0.0}{}
     
 void EquationIntro::setup(){
-    ofxSubscribeOsc(8000, "/intro/restart", [&](ofxOscMessage& m){
-        index_ = 0;
-        tracers_[index_].restart();
-    });
-    
-    ofxSubscribeOsc(8000, "/intro/next", [&](ofxOscMessage& m){
-        ++index_;
-        tracers_[index_].restart();
-    });
-    
-    ofxSubscribeOsc(8000, "/intro/speed", [&](ofxOscMessage& m){
-        for(auto& tracer : tracers_) tracer.setSpeed(m.getArgAsFloat(0) * 0.3 + 0.09);
-    });
-    
     // load svg
     tracers_.resize(kEquationNum);
-    for(auto i = 0; i < kEquationNum; ++i){
-        tracers_[i].load("equation/equation_" + ofToString(i) + ".svg");
+    for(auto i = 0; i < kEquationNum; ++i){ tracers_[i].load("equation/equation_" + ofToString(i) + ".svg"); }
+
+    // translation setting
+    ofJson js = ofLoadJson("equation/translation.json");
+    for(auto i = 0; i < js.size(); ++i){ tracers_[i].translate(glm::vec2{js[ofToString(i)]["x"], js[ofToString(i)]["y"]}); }
+    
+    ofAddListener(ofEvents().update, this, &EquationIntro::update);
+    
+    //init
+    for(auto& tracer : tracers_){
+        ofAddListener(tracer.getFinishEvent(), this, &EquationIntro::nextEquation);
+        tracer.setSpeed(speed_);
     }
     
-    tracers_[0].translate(glm::vec2(554.19, 503.55));
-    tracers_[1].translate(glm::vec2(544.696, 503.55));
-    tracers_[2].translate(glm::vec2(615.394, 454.5));
-    tracers_[3].translate(glm::vec2(455.278, 494.842));
-    tracers_[4].translate(glm::vec2(314.45, 503.55));
-    tracers_[5].translate(glm::vec2(615.394,454.5));
-    tracers_[6].translate(glm::vec2(192.546,503.55));
-    tracers_[7].translate(glm::vec2(226.162,494.848));
-    tracers_[8].translate(glm::vec2(615.394,454.5 ));
-    tracers_[9].translate(glm::vec2(128.338, 494.7));
-    tracers_[10].translate(glm::vec2(50.646,503.55));
-    tracers_[11].translate(glm::vec2(615.394,454.5));
-    tracers_[12].translate(glm::vec2(14.738,494.5));
-    tracers_[13].translate(glm::vec2(822.489,513.542));
-        
+    tracers_[index_].start();
+}
+
+void EquationIntro::reset(){
+    is_finish_event_ = false;
+    speed_ = 0.09;
+    index_ = 0;
+    delay_timer_ = 0.0;
+    tracers_[index_].restart();
+}
+    
+void EquationIntro::nextEquation(){
+    is_finish_event_ = true;
 }
     
 void EquationIntro::setLaser(LaserOSC* laser){
     laser_ = laser;
+}
+    
+void EquationIntro::update(ofEventArgs&){
+    if(is_finish_event_){ delay_timer_ += 0.05;}
+    if(delay_timer_ > 1) {
+        is_finish_event_ = false;
+        delay_timer_ = 0.0;
+        if(index_ < kEquationNum-1) {
+            ++index_;
+            speed_ += 0.025;
+            tracers_[index_].restart();
+            tracers_[index_].setSpeed(speed_);
+        }
+    }
+    
 }
     
 void EquationIntro::drawLaser(){
@@ -64,8 +71,4 @@ void EquationIntro::drawLaser(){
 void EquationIntro::drawVisual(){
     tracers_[index_].drawSvg();
 }
-    
-
-    
-    
 }

@@ -21,6 +21,7 @@ public:
     void setLaser(LaserOSC* laser) override;
     void drawLaser() override;
     void drawVisual() override;
+    void reset() override;
         
 private:
     LaserOSC* laser_;

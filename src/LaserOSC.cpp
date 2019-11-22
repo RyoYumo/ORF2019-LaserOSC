@@ -11,7 +11,7 @@
 #define DEBUG
 
 namespace orf2019 {
- 
+    
 // setup()
 //
 // Setup osc sender with default settings.
@@ -80,6 +80,12 @@ void LaserOSC::drawRect(float x, float y, float w, float h){
 #ifdef DEBUG
     drawRectOnOFWindow(x,y,w,h);
 #endif
+}
+    
+void LaserOSC::end(){
+    ofxOscMessage m;
+    m.setAddress("/end");
+    sender_.sendMessage(m);
 }
     
     

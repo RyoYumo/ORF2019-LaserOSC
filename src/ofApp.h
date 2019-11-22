@@ -8,23 +8,16 @@
 #include "EquationShuffle.hpp"
 #include "EquationIntro.hpp"
 #include "EquationOutro.hpp"
+#include "PhotonRemote.hpp"
 #include "ofxSyphon.h"
 
 class Black : public orf2019::BaseScene {
 public:
     void setup() override {}
     void setLaser(orf2019::LaserOSC* laser) override {}
+    void reset() override {}
     void drawLaser() override{}
     void drawVisual() override { ofBackground(0,0,0); }
-};
-
-class White : public orf2019::BaseScene {
-public:
-    void setup() override{}
-    void setLaser(orf2019::LaserOSC* laser) override{}
-    void drawLaser() override{}
-    void drawVisual() override { ofBackground(255,255,255); }
-    
 };
 
 class ofApp : public ofBaseApp{

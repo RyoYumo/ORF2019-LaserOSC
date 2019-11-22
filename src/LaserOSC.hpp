@@ -19,6 +19,7 @@ public:
     void drawLine(float x1, float y1, float x2, float y2);
     void drawEllipse(float x, float y, float w, float h);
     void drawRect(float x, float y, float w, float h);
+    void end();
 private:
     void drawPointOnOFWindow(float x, float y);
     void drawLineOnOFWindow(float x1, float y1, float x2, float y2);

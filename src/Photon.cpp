@@ -11,13 +11,6 @@
 
 namespace orf2019 {
 void Photon::setup(){
-    // OSC
-    const int kPort = 8000;
-    ofxSubscribeOsc(kPort, "/photon/next", [&](){ index_ = ofRandom(0, 136);}); // random index
-    ofxSubscribeOsc(kPort, "/photon/degree", [&](ofxOscMessage& m) { degree_ = m.getArgAsFloat(0) * 360 - 90.0;}); // for tracing
-    ofxSubscribeOsc(kPort, "/photon/outline", [&](ofxOscMessage& m){ state_ = DrawState::kOutline;}); // change draw state
-    ofxSubscribeOsc(kPort, "/photon/tracing", [&](ofxOscMessage& m){ state_ = DrawState::kTracing;}); // change draw state
-    
     // load img
     for(auto i = 0; i < kImageNum; ++i){
         data_[i].img.load("photon/images/" + ofToString(i) + ".png");
@@ -40,26 +33,39 @@ void Photon::drawVisual(){
 }
     
 void Photon::drawLaser(){
-    if (state_ == DrawState::kOutline) drawOutlineCircle(); else drawTracingPoint();
+    drawOutlineCircle();
+    drawTracingPoint();
 }
     
 void Photon::drawOutlineCircle(){
     for(const auto& d : data_[index_].circles){
-        ofPushMatrix();
-        ofTranslate(d.x, d.y);
-        laser_->drawEllipse(0, 0, d.radius*2.0, d.radius*2.0);
-        ofPopMatrix();
+        laser_->drawEllipse(d.x, d.y, d.radius*2.0, d.radius*2.0);
     }
 }
     
     
 void Photon::drawTracingPoint(){
-    for(const auto& d : data_[index_].circles){
-        ofPushMatrix();
-        ofTranslate(d.x, d.y);
-        laser_->drawPoint(d.radius * cos(ofDegToRad(degree_)), d.radius * sin(ofDegToRad(degree_)));
-        laser_->drawPoint(d.radius * cos(ofDegToRad(-1 * degree_)), d.radius * sin(ofDegToRad(-1 * degree_)));
-        ofPopMatrix();
+    auto first = data_[index_].circles.begin();
+    auto last  = data_[index_].circles.end();
+    for(; first != last; ++first){
+        auto offset = std::distance(data_[index_].circles.begin(), first) % 2 == 0 ? HALF_PI : 0;
+        laser_->drawPoint(first->x + first->radius * cos(ofGetElapsedTimef() + offset), first->y +first->radius * sin(ofGetElapsedTimef() + offset));
+        laser_->drawPoint(first-> x + first->radius * cos(-1 * ofGetElapsedTimef() + offset), first->y + first->radius * sin(-1 * ofGetElapsedTimef() + offset));
+     
     }
 }
+    
+    
+void Photon::update(ofEventArgs&){
+    progress_+=speed_;
+    if(progress_ > 1.0) {
+        index_ = ofRandom(0, 136);
+        progress_ = 0.0;
+    }
+}
+
+void Photon::reset(){
+    progress_ = 0.0;
+}
+    
 }

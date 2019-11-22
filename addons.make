@@ -1,3 +1,4 @@
 ofxOsc
 ofxPubSubOsc
 ofxSvg
+ofxSyphon

@@ -1,16 +1,16 @@
 # ORF2019-LaserOSC
 
-# version
+## version
 - of_v0.10.1
 - xcode10.1
 
-# dependency
+## dependency
 - ofxOsc
 - ofxPubSubOsc
 - ofxSyphon
 - ofxSvg
 
-## setup
+## Setup
 - 脇田さんのPhotonの画像を/bin/data/images/のしたに入れる
 - LaserOSCの#define DEBUGをコメントアウト
 

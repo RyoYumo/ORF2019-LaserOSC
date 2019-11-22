@@ -11,7 +11,7 @@
 - ofxSvg
 
 ## Setup
-- 脇田さんのPhotonの画像を/bin/data/images/のしたに入れる
+- 脇田さんのPhotonの画像を/bin/data/photon/images/のしたに入れる
 - LaserOSCの#define DEBUGをコメントアウト
 
 ## Scene
